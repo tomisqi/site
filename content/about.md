@@ -13,10 +13,3 @@ and other stuff I find interesting.
 You can contact me via the Twitter (link below).
 
 <img src="/images/me.png" alt="me" width="200"/>
-
-{{< comment >}}
-
-  * [Cobra](https://github.com/spf13/cobra)
-  * [Viper](https://github.com/spf13/viper)
-
-{{< /comment >}}

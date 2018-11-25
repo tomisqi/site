@@ -1,6 +1,7 @@
 baseurl = "https://peaceful-sinoussi-a9ee70.netlify.com/"
 languageCode = "en-us"
 Title = "Tony"
+theme = "potato-dark"
 
 # Copyright notice. This is displayer in the footer.
 copyright = "&copy; Copyright notice"

@@ -33,9 +33,6 @@ the resources to use by the way of a bitmap.
 In TS 38.212, we see that the number of bits in DCI for allocation type 1
 is given by:
 
-{{< comment >}}
-\lceil log_2 {(\frac{N_{RB}^{DL,BWP} * (N_{RB}^{DL,BWP} + 1)}{2})} \rceil
-{{< /comment >}}
 ![eq1] (https://latex.codecogs.com/gif.latex?%5Clceil%20log_2%20%7B%28%5Cfrac%7BN_%7BRB%7D%5E%7BDL%2CBWP%7D%20*%20%28N_%7BRB%7D%5E%7BDL%2CBWP%7D%20&plus;%201%29%7D%7B2%7D%29%7D%20%5Crceil)
 
 where,
@@ -79,16 +76,3 @@ The above is identical to formula found in TS 38.212, by substituting
 
 <br><br>
 <img src="/images/black64x64.png" alt="fin" width="16" align="right"/>
-
-{{< comment >}}
-## Resource allocation type 0
-
-A quick way to remember what resource allocation type 0 is to think of it as a
-bitmap, each bit representing a frequency resource.<br>
-It is tempting to think that the representation should be simple: use one bit to
-represent each resource block (RB) in our bandwidth. The downside with this is
-that it requires too many bits. If our bandwidth part is 275 RB wide, we would
-need 275 bits to be able to represent our whole bandwidth. This is too expensive.
-Is there a better way?<br>
-The solution in NR is to blah blah..
-{{< /comment >}}

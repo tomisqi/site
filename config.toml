@@ -1,3 +1,4 @@
+baseurl = "https://peaceful-sinoussi-a9ee70.netlify.com/"
 languageCode = "en-us"
 Title = "Tony"
 
@@ -10,14 +11,9 @@ copyright = "&copy; Copyright notice"
   # Social accounts. Link to these accounts are displayed in the header and
   # footer
   twitter = "tomisqi"
-  linkedin = "Your LinkedIn username"
+  #linkedin = "Your LinkedIn username"
   # Disqus shortname
-  disqus = ""
-  # Google Analytics API key.
-  ga_api_key = "Your Google Analytics tracking id"
-  # Logo image. This is displayed ogp image.
-  logo = "/static/images/allnightlong.jpg"
-  favicon = "/path/to/favicon"
+  #disqus = ""
 
 [[menu.main]]
     name = "Blog"

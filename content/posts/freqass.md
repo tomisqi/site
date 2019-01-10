@@ -8,7 +8,7 @@ tags = [
 date = "2018-11-01"
 +++
 
-This post will be about some reflections I had when reading about the frequency resource alliocation in 5G NR.
+This post will be about some reflections I had when reading about the frequency resource allocation in 5G NR.
 I will specifically discuss frequency resource allocation on DL since this is the
 area I've been reading about.
 
@@ -21,16 +21,16 @@ In addition to giving a short description of resource allocation in 5G NR, I set
 If any of this sounds interesting, you might found the information below useful.
 
 ## Resource allocation types
-In 5G NR, there are two ways to describe frequency resource allocation in DL. The "frequency assignment" is part of the DCI, and is how the network tells the UE what frequency resources will be used for PDSCH. <br>
+In 5G NR, there are two ways to describe frequency resource allocation in DL. The "frequency assignment" is part of the DCI, and is how the network tells the terminal what frequency resources will be used for PDSCH. <br>
 There are two ways to describe frequency resource allocations:
 
 1. Resource allocation type 0
 2. Resource allocation type 1
 
 ## Resource allocation type 0
-When using resource allocation type 0, the network tells the UE the frequency resources to use by the way of a bitmap. <br>
+When using resource allocation type 0, the network tells the terminal the frequency resources to use by the way of a bitmap. <br>
 It is tempting to think that we could use 1 bit per resource block in the bitmap, but this approach doesn't scale well if we want to keep our control data overhead as small as possible. In 5G NR, there are a maximum of 275 resource blocks in DL, and allocating 1 bit per resource block would be costly.<br>
-Instead, a tradeoff is reached: the number of bits is limited so that the DCI can remain small, but resolution is lost since 1 bit is used to represent a group of resource blocks (RBG) instead of uniquely representing a resource block.
+Instead, a tradeoff is reached: the number of bits is limited so that the DCI can remain small, but allocation resolution is reduced since 1 bit is used to represent a group of resource blocks (RBG) instead of uniquely representing a resource block.
 
 The size of the RBG varies by bandwidth as described in TS 38.214
 
@@ -45,9 +45,9 @@ The values in the table represent the "nominal" size of the RBG (denoted _P_).
 
 ##### Why these nominal RBG sizes?
 
-Something that pops out from the table is that RBG sizes are proportional to the the size of the bandwidth - i.e. RBG sizes get bigger as bandwidth gets bigger. This makes sense given that if we were to use say size=2 for all bandwidths, larger bandwidths will have proportionally high number of RBGs which will mean a higher number of bits in the DCI to describe the frequency allocation.<br>
-If we want to keep the number of RBGs constant regardless of bandwidth, the RBG size must get bigger as bandwidth increases. If you divide the max bandwidth size of each group in the table by the RBG size, you get exactly that: a constant number of RBGs - between 17-18. <br>
-I believe this number was chosen to be compatible with resource alliocation type 1 which is descibed in the next section. Frequency alloication type 1 has a specific number of combinations that can be represented. This number turns out to be 16 for the maximum bandwidth part size. <br>
+Something that jumps out from the table is that RBG sizes are proportional to the size of the bandwidth - i.e. RBG sizes get bigger as bandwidth gets bigger. This makes sense given that if we were to use say size=2 for all bandwidths, larger bandwidths will have proportionally high number of RBGs which will mean a higher number of bits in the DCI to describe the frequency allocation.<br>
+If we want to keep the number of RBGs constant regardless of bandwidth, the RBG size must get bigger as bandwidth increases. If you divide the max bandwidth size of each group in the table by the RBG size, you get exactly that: a constant number of RBGs - between 17-18 for Configuration 1. <br>
+I believe this number was chosen to be compatible with resource allocation type 1 which is described in the next section. Frequency allocation type 1 has a specific number of combinations that can be represented. This number turns out to be 16 for the maximum bandwidth part size. <br>
 This is similar to the size seen in this allocation type, so both allocation types use roughly the same number of bits in the DCI.
 
 ##### So what are the "non-nominal" RBGs?
@@ -60,7 +60,7 @@ These RBGs are the first and last RBGs of the bandwidth part (BWP). Defined as f
 
 ##### Why these non-nominal RBG sizes?
 
-I found that this comes from the fact that RBG boudaries are kept aligned regardless of a shift in the start of the BWP (bwpStart). In other words, the RBGs are defined for a shift of zero in the bwpStart. Any RBGs that belong to a shifted bwpStart are aligned to a zero-shifted bwpStart, which means there will be RBGs that are of a different size at both ends of the BWP.<br>
+I found that this comes from the fact that RBG boundaries are kept aligned regardless of a shift in the start of the BWP (bwpStart). The RBGs are defined for a zero-shifted bwpStart, and any RBGs that belong to a non-zero shifted bwpStart are aligned to the zero-shifted bwpStart.<br>
 ![image3] (/images/rbg.png)<br>
  <div style="text-align:center">(left) bwpStart=0 means RBGs are equal to the nominal RBG sizes, while (right) bwpStart=2 means RBGs at both ends are different </div>
 
@@ -68,8 +68,8 @@ In the figure above, notice that for bwpStart=2, RBGs at both ends of the bandwi
 
 ## Resource allocation type 1
 
-When using resource allocation type 1 the network tells the UE a start frequency resource and a number of contiguous frequency resources to use. <br>
-This is different from type 0, wherein the UE is given the resources to use by the way of a bitmap. Also different from type 0 is that in type 1, there is no longer a need
+When using resource allocation type 1 the network tells the terminal a start frequency resource and a number of contiguous frequency resources to use. <br>
+This is different from type 0, wherein the terminal is given the resources to use by the way of a bitmap. Also different from type 0 is that in type 1, there is no longer a need
 for RBGs. Instead, the precise starting resource block and the number of contiguously allocated resource blocks is signaled in the DCI. Both pieces of data (start and number) are encoded in a value called resource indication value (RIV).
 
 ##### How many combinations do we have for start resource block / number of resource blocks given a certain bandwidth?

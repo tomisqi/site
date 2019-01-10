@@ -1,5 +1,5 @@
 +++
-title = "Frequency assignment in 5G NR"
+title = "Frequency resource allocation in 5G NR"
 description = ""
 tags = [
     "nr",
@@ -8,74 +8,79 @@ tags = [
 date = "2018-11-01"
 +++
 
-<span style="color:red">-This post is a work in progress-</span>
-
-This post will be about some reflections I had when reading about the
-frequency assignments in 5G NR.
-I will specifically discuss frequency assignments on DL since this is the
+This post will be about some reflections I had when reading about the frequency resource alliocation in 5G NR.
+I will specifically discuss frequency resource allocation on DL since this is the
 area I've been reading about.
 
-Frequency assignment is described in detail in TS 38.214.
+In addition to giving a short description of resource allocation in 5G NR, I set out to answer the following questions:
+
+1. Why are the nominal resource block group (RBG) sizes the values they are?
+2. Why are the non-nominal RBG sizes the values they are?
+3. How can we reason about the different combinations that can be encoded in resource allocation type 1?
+
+If any of this sounds interesting, you might found the information below useful.
 
 ## Resource allocation types
-5G NR defines two ways to describe frequency assignments on DL. This assignment is part of the DCI, and is how the network tells the UE what frequency resources will be used for PDSCH. <br>
-The two possible ways to describe frequency assignments are:
+In 5G NR, there are two ways to describe frequency resource allocation in DL. The "frequency assignment" is part of the DCI, and is how the network tells the UE what frequency resources will be used for PDSCH. <br>
+There are two ways to describe frequency resource allocations:
 
 1. Resource allocation type 0
 2. Resource allocation type 1
 
 ## Resource allocation type 0
-When using resource allocation type 0 the network tells the UE the frequency resources to use by the way of a bitmap. <br>
-Given that the 5G NR standard allows for a maximum of 275 resource blocks, an equal number of bits would be needed to encode this information if 1 bit per resource block were to be used. Instead a tradeoff is reached: the number of bits is limited so that the DCI can remain relatively small, but resolution is lost by allocating 1 bit per resource block group (RBG), which are essentially a collection of contiguous resource blocks.
+When using resource allocation type 0, the network tells the UE the frequency resources to use by the way of a bitmap. <br>
+It is tempting to think that we could use 1 bit per resource block in the bitmap, but this approach doesn't scale well if we want to keep our control data overhead as small as possible. In 5G NR, there are a maximum of 275 resource blocks in DL, and allocating 1 bit per resource block would be costly.<br>
+Instead, a tradeoff is reached: the number of bits is limited so that the DCI can remain small, but resolution is lost since 1 bit is used to represent a group of resource blocks (RBG) instead of uniquely representing a resource block.
 
-The size of the RBG varies by bandwidth as is evidenced in Table 5.1.2.2.1-1 of TS 38.214
+The size of the RBG varies by bandwidth as described in TS 38.214
 
 | Bandwidth Part Size | Configuration 1 | Configuration 2 |
-| --------------------|:---------------:| ---------------:|
+|:-------------------:|:---------------:|:---------------:|
 | 1 – 36              | 2               | 4               |
 | 37 - 72             | 4               | 8               |
 | 73 - 144            | 8               | 16              |
 | 145 - 275           | 16              | 16              |
 
-The values in the table represent the "nominal" size of the RBG and are denominated _P_. This means that there are non-nominal sizes, and indeed there are.<br>
-Following the table, TS 38.214 explains that:
+The values in the table represent the "nominal" size of the RBG (denoted _P_).
 
- - the size of the first RBG is []
- - the size of the last RBG is [] if [] and _P_ otherwise,
- - the size of all other RBGs is _P_
+##### Why these nominal RBG sizes?
 
-The first and second bullet from above are the "non-nominal" sizes of the RBG.
+Something that pops out from the table is that RBG sizes are proportional to the the size of the bandwidth - i.e. RBG sizes get bigger as bandwidth gets bigger. This makes sense given that if we were to use say size=2 for all bandwidths, larger bandwidths will have proportionally high number of RBGs which will mean a higher number of bits in the DCI to describe the frequency allocation.<br>
+If we want to keep the number of RBGs constant regardless of bandwidth, the RBG size must get bigger as bandwidth increases. If you divide the max bandwidth size of each group in the table by the RBG size, you get exactly that: a constant number of RBGs - between 17-18. <br>
+I believe this number was chosen to be compatible with resource alliocation type 1 which is descibed in the next section. Frequency alloication type 1 has a specific number of combinations that can be represented. This number turns out to be 16 for the maximum bandwidth part size. <br>
+This is similar to the size seen in this allocation type, so both allocation types use roughly the same number of bits in the DCI.
 
-_Why are the non-nominal values what they are?_
+##### So what are the "non-nominal" RBGs?
 
-I found that this comes from the fact that the start/end of RBGs need to be aligned regardless of the start of the BWP [].<br>
-See the following figure for reference<br>
-[insert figure]<br>
-As can be seen, RBGs that are on the both ends of the bandwidth part are smaller if they are not aligned with the standard. In this way RBGs are aligned always regardless of start of BWP
+If there are nominal RBG sizes, it is safe to assume that there will also be "non-nominal" RBG sizes. It turns out that "non-nominal" RBGs are RBGs whose size are smaller than the nominal ones.<br>
+These RBGs are the first and last RBGs of the bandwidth part (BWP). Defined as follows in TS 38.214:
 
-_Why these RBG sizes?_
+ - the size of the first RBG is ![eq] (https://latex.codecogs.com/gif.latex?RBG_0^{size}&space;=&space;P&space;-&space;(bwpStart)&space;mod&space;P)
+ - the size of the last RBG is ![eq](https://latex.codecogs.com/gif.latex?RBG_{last}^{size}&space;=&space;(bwpStart&space;&plus;&space;bwpSize)&space;mod&space;P)
 
-<...coming...>
+##### Why these non-nominal RBG sizes?
+
+I found that this comes from the fact that RBG boudaries are kept aligned regardless of a shift in the start of the BWP (bwpStart). In other words, the RBGs are defined for a shift of zero in the bwpStart. Any RBGs that belong to a shifted bwpStart are aligned to a zero-shifted bwpStart, which means there will be RBGs that are of a different size at both ends of the BWP.<br>
+![image3] (/images/rbg.png)<br>
+ <div style="text-align:center">(left) bwpStart=0 means RBGs are equal to the nominal RBG sizes, while (right) bwpStart=2 means RBGs at both ends are different </div>
+
+In the figure above, notice that for bwpStart=2, RBGs at both ends of the bandwidth part are smaller (shaded gray in the figure). These are two "non-nominal" RBG sizes. From the figure, it is clear that if alignment is to be kept, the RBGs at both ends of the BWP will have a different size - a non-nominal size - if the start of the BWP is shifted.
 
 ## Resource allocation type 1
 
 When using resource allocation type 1 the network tells the UE a start frequency resource and a number of contiguous frequency resources to use. <br>
 This is different from type 0, wherein the UE is given the resources to use by the way of a bitmap. Also different from type 0 is that in type 1, there is no longer a need
-for RBGs. Instead, the precise starting resource block and the number of contiguously allocated resource block is signaled in the DCI. Both pieces of data (start and number) are encoded in a value called
-resource indication value (RIV).
+for RBGs. Instead, the precise starting resource block and the number of contiguously allocated resource blocks is signaled in the DCI. Both pieces of data (start and number) are encoded in a value called resource indication value (RIV).
 
-_How many combinations do we have for start resource block / number of resource blocks given a certain bandwidth?_
-
-Answering this question should shed light on the number of bits used in DCI to represent frequency assignments that use resource allocation type 1.
+##### How many combinations do we have for start resource block / number of resource blocks given a certain bandwidth?
 
 To answer this question, I find it useful to think of a simple scenario. <br>
-Suppose our bandwidth was equal to 4. If our start RB is ___S___, there are four
-such start RBs:<br>
+Suppose our bandwidth was equal to 4. If our start resource block is ___S___, there are four such start resource blocks:<br>
 ![image1] (/images/allocType1_startRBs.png)
-For each of those start RB ___S___, we have a different number of resource blocks to use. This number is limited by the number of resource blocks ahead of the start resource block.<br>
+For each of those start resource blocks ___S___, we have a different number of resource blocks to use. This number is limited by the number of resource blocks ahead of the start resource block.<br>
 If ___S___ = 0, there four different allocation sizes (shown leftmost in the image below). If ___S___ = 1, there are three different allocation sized and so on.
 ![image2] (/images/allocType1.png)
-Indeed, as can be seen in the image, in total we say that we have 1 + 2 + 3 + 4 different possible configurations for our frequency allocation.<br>
+As can be seen in the image, in total we have 1 + 2 + 3 + 4 different possible configurations for our frequency allocation.<br>
 We can easily generalize this to say that given a bandwidth _B_ there will be 1 + 2 + 3 ... + (_B_ - 1) + _B_ possible different possible configurations.<br>
 Using the sum of natural numbers, this is equivalent to
 
@@ -94,11 +99,6 @@ where,
 
 ![eq4] (https://latex.codecogs.com/gif.latex?N_%7BRB%7D%5E%7BDL%2CBWP%7D)
         = The number of resource blocks in the bandwidth part
-
-
-<br><br>
-I find understanding how this formula comes along very rewarding.
-
 
 <br><br>
 <img src="/images/black64x64.png" alt="fin" width="16" align="right"/>
